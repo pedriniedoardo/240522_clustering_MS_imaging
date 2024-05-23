@@ -1,0 +1,8 @@
+# file
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# folder
+renv/

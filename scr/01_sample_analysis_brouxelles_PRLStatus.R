@@ -1,5 +1,5 @@
 # AIM ---------------------------------------------------------------------
-# explore the dataset
+# explore the dataset add the PRLstatus variable to the main dataset
 
 # libraries ---------------------------------------------------------------
 library(tidyverse)
@@ -21,7 +21,8 @@ df_tot <- df %>%
   dplyr::select(-c(id,subject)) %>%
   column_to_rownames("rowname") %>%
   # select only the continous variables
-  dplyr::select(-c(sex,diagnosis,diagnosis_binary,PRLStatus,LongT1Cutoff,ConfLevel)) %>%
+  # keep the PRL status
+  dplyr::select(-c(sex,diagnosis,diagnosis_binary,LongT1Cutoff,ConfLevel)) %>%
   # lesion age days and years are redoundant keep only one
   dplyr::select(-c(LesionAge_Years))
 
@@ -56,7 +57,7 @@ LUT_sample <- df %>%
                                ConfLevel == 5 ~ "Very Certain PRL")) %>%
   rownames_to_column("sample")
 
-write_tsv(LUT_sample,"../../out/table/LUT_sample.tsv")
+# write_tsv(LUT_sample,"../../out/table/LUT_sample.tsv")
 
 # EDA ---------------------------------------------------------------------
 lapply(LUT_sample[,-1], as.factor) %>%
@@ -173,7 +174,7 @@ plotVar(pca_all, comp = c(1, 2),
 test <- biplot(pca_all)
 
 test$
-test$layers[[4]]
+  test$layers[[4]]
 
 list_data <- ggplot_build(test)
 
@@ -245,6 +246,18 @@ df_tot_noNA_scale %>%
   theme_bw()+
   theme(strip.background = element_blank())
 
+# plot the proportion of PRLStatus per sample alone per cluster
+df_tot_noNA_scale %>%
+  data.frame() %>%
+  rownames_to_column("sample") %>%
+  mutate(cluster = as.factor(km.res$cluster)) %>%
+  left_join(LUT_sample,by = "sample",suffix = c(".scaled",".cat")) %>%
+  group_by(cluster,PRLStatus.cat) %>%
+  summarise(n = n()) %>%
+  mutate(tot = sum(n)) %>%
+  mutate(prop = n/tot) %>%
+  ggplot(aes(x=cluster,y = prop,fill = PRLStatus.cat))+geom_col()+theme_bw()
+
 # ht1 <- Heatmap(t(df_tot_noNA_scale), cluster_rows = F,
 #                cluster_columns = T,
 #                show_heatmap_legend = TRUE,top_annotation = column_ha1,column_km = 4)
@@ -267,10 +280,11 @@ fviz_silhouette(sil2)
 
 # plot as heatmap
 table(km.res2$cluster)
-show_col(hue_pal()(2))
+show_col(hue_pal()(3))
 column_ha12 <- HeatmapAnnotation(module = km.res2$cluster,
                                  col = list(module = c("1" = "#F8766D",
-                                                       "2" = "#00BFC4")))
+                                                       "2" = "#00BA38",
+                                                       "3" = "#619CFF")))
 
 ht12 <- Heatmap(t(df_tot_noNA_scale), cluster_rows = F,
                 cluster_columns = F,
@@ -289,6 +303,18 @@ df_tot_noNA_scale %>%
   theme_bw()+
   theme(strip.background = element_blank())
 
+# plot the proportion of PRLStatus per sample alone per cluster
+df_tot_noNA_scale %>%
+  data.frame() %>%
+  rownames_to_column("sample") %>%
+  mutate(cluster = as.factor(km.res2$cluster)) %>%
+  left_join(LUT_sample,by = "sample",suffix = c(".scaled",".cat")) %>%
+  group_by(cluster,PRLStatus.cat) %>%
+  summarise(n = n()) %>%
+  mutate(tot = sum(n)) %>%
+  mutate(prop = n/tot) %>%
+  ggplot(aes(x=cluster,y = prop,fill = PRLStatus.cat))+geom_col()+theme_bw()
+
 # Hierarchical clustering eclust ------------------------------------------
 # Hierarchical clustering using eclust() Enhanced hierarchical clustering
 res.hc <- eclust(df_tot_noNA_scale, "hclust")
@@ -302,10 +328,10 @@ fviz_dend(column_dend, rect = TRUE,k = 4,k_colors = c("#C77CFF","#7CAE00","#00BF
 
 show_col(hue_pal()(4))
 column_ha2 <- HeatmapAnnotation(module = modules,
-                               col = list(module = c("1" = "#F8766D",
-                                                     "2" = "#7CAE00",
-                                                     "3" = "#00BFC4",
-                                                     "4" = "#C77CFF")))
+                                col = list(module = c("1" = "#F8766D",
+                                                      "2" = "#7CAE00",
+                                                      "3" = "#00BFC4",
+                                                      "4" = "#C77CFF")))
 
 ht2 <- Heatmap(t(df_tot_noNA_scale), cluster_rows = F,
                cluster_columns = column_dend,
@@ -331,3 +357,15 @@ df_tot_noNA_scale %>%
   ggplot(aes(x=cluster,y=value))+geom_boxplot(outlier.shape = NA)+geom_point(position = position_jitter(width = 0.1))+facet_wrap(~variable,scales = "free")+
   theme_bw()+
   theme(strip.background = element_blank())
+
+# plot the proportion of PRLStatus per sample alone per cluster
+df_tot_noNA_scale %>%
+  data.frame() %>%
+  rownames_to_column("sample") %>%
+  mutate(cluster = as.factor(modules)) %>%
+  left_join(LUT_sample,by = "sample",suffix = c(".scaled",".cat")) %>%
+  group_by(cluster,PRLStatus.cat) %>%
+  summarise(n = n()) %>%
+  mutate(tot = sum(n)) %>%
+  mutate(prop = n/tot) %>%
+  ggplot(aes(x=cluster,y = prop,fill = PRLStatus.cat))+geom_col()+theme_bw()

@@ -3,6 +3,26 @@
     "Version": "4.3.3",
     "Repositories": [
       {
+        "Name": "BioCsoft",
+        "URL": "https://bioconductor.org/packages/3.18/bioc"
+      },
+      {
+        "Name": "BioCann",
+        "URL": "https://bioconductor.org/packages/3.18/data/annotation"
+      },
+      {
+        "Name": "BioCexp",
+        "URL": "https://bioconductor.org/packages/3.18/data/experiment"
+      },
+      {
+        "Name": "BioCworkflows",
+        "URL": "https://bioconductor.org/packages/3.18/workflows"
+      },
+      {
+        "Name": "BioCbooks",
+        "URL": "https://bioconductor.org/packages/3.18/books"
+      },
+      {
         "Name": "P3M",
         "URL": "https://packagemanager.posit.co/cran/latest"
       },
@@ -1766,8 +1786,8 @@
     "mixOmics": {
       "Package": "mixOmics",
       "Version": "6.26.0",
-      "Source": "Repository",
-      "Repository": "https://bioconductor.org/packages/3.18/bioc",
+      "Source": "Bioconductor",
+      "Repository": "Bioconductor",
       "Requirements": [
         "BiocParallel",
         "MASS",
